@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversational Agent Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .intro {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .instructions {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        
+        .instructions h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .instructions strong {
+            color: #333;
+        }
+        
+        .progress {
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .progress-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .status {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .test-card {
+            display: none;
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .test-card.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .condition-label {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .link-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .link-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .link {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+            padding: 8px 0;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .copy-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        .copy-button:hover {
+            background: #5568d3;
+        }
+        
+        .copy-button.copied {
+            background: #10b981;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .warning-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .complete-button {
+            background: #10b981;
+            margin-top: 15px;
+        }
+        
+        .complete-button:hover {
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .message h2 {
+            color: #10b981;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .error {
+            background: #fee;
+            border-left: 4px solid #e53e3e;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            color: #c53030;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Conversational Agent Test</h1>
+        <p class="intro">Thanks for taking the time to help us with the test. We are conducting a project on designing conversational agents.</p>
+        
+        <div class="instructions">
+            <h3>📋 Important Instructions:</h3>
+            <ul>
+                <li>Each test takes approximately <strong>10-15 minutes</strong></li>
+                <li>The agent will <strong>automatically end the conversation</strong> when the test is complete</li>
+                <li><strong>IMPORTANT:</strong> When filling out the survey, you must <strong>paste your agent link</strong> at the beginning</li>
+                <li>You can participate in up to <strong>2 tests</strong> (one from each condition)</li>
+                <li>Please complete one test before starting the next</li>
+            </ul>
+        </div>
+        
+        <div class="progress">
+            <div class="progress-text">Progress: <span id="completed">0</span>/2 completed</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="status" id="statusText">Click the button below to start your first test</div>
+        </div>
+        
+        <div id="mainContent">
+            <button class="button" id="startButton" onclick="startNewTest()">Start New Test</button>
+        </div>
+        
+        <div class="test-card" id="testCard">
+            <span class="condition-label" id="conditionLabel">Condition</span>
+            
+            <div class="link-box">
+                <div class="link-label">🤖 Agent Test Link:</div>
+                <a href="#" target="_blank" class="link" id="agentLink"></a>
+                <button class="copy-button" id="copyAgentBtn" onclick="copyAgentLink()">📋 Copy Link</button>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ Remember:</strong>
+                You MUST paste this agent link at the beginning of the survey!
+            </div>
+            
+            <div class="link-box">
+                <div class="link-label">📊 Survey Link (complete after testing):</div>
+                <a href="https://neu.co1.qualtrics.com/jfe/form/SV_6lkuGpk2d9qNKzI" target="_blank" class="link">https://neu.co1.qualtrics.com/jfe/form/SV_6lkuGpk2d9qNKzI</a>
+                <button class="copy-button" onclick="copySurveyLink()">📋 Copy Link</button>
+            </div>
+            
+            <button class="button complete-button" onclick="markComplete()">✓ Mark as Completed</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxPBR4BgjUo0pIk327DvJc14ZpD4L34rZCh-FTxT8beYmVx_JO4e-I_htI4GiS7ZhfazA/exec';
+        const MAX_TESTS = 2;
+        
+        function getUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+
+        function getCompletedConditions() {
+            const completed = localStorage.getItem('completedConditions');
+            return completed ? JSON.parse(completed) : [];
+        }
+
+        function saveCompletedCondition(condition) {
+            const completed = getCompletedConditions();
+            if (!completed.includes(condition)) {
+                completed.push(condition);
+                localStorage.setItem('completedConditions', JSON.stringify(completed));
+            }
+        }
+
+        function updateProgress() {
+            const completed = getCompletedConditions();
+            const count = completed.length;
+            
+            document.getElementById('completed').textContent = count;
+            document.getElementById('progressFill').style.width = (count / MAX_TESTS * 100) + '%';
+            
+            if (count === 0) {
+                document.getElementById('statusText').textContent = 'Click the button below to start your first test';
+            } else if (count < MAX_TESTS) {
+                document.getElementById('statusText').textContent = `You have completed ${count} test${count > 1 ? 's' : ''}. You can do ${MAX_TESTS - count} more.`;
+            } else {
+                document.getElementById('statusText').textContent = '🎉 You have completed all tests. Thank you!';
+            }
+            
+            if (count >= MAX_TESTS) {
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="message">
+                        <h2>✅ All Tests Completed!</h2>
+                        <p>Thank you for participating in all ${MAX_TESTS} tests. We appreciate your feedback!</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function startNewTest() {
+            const completed = getCompletedConditions();
+            
+            if (completed.length >= MAX_TESTS) {
+                alert('You have already completed the maximum number of tests!');
+                return;
+            }
+            
+            const button = document.getElementById('startButton');
+            button.disabled = true;
+            button.textContent = 'Loading...';
+            
+            try {
+                const userId = getUserId();
+                
+                // Get available conditions
+                const availableResponse = await fetch(`${API_URL}?action=getAvailableConditions&userId=${userId}`);
+                const availableData = await availableResponse.json();
+                
+                if (!availableData.success || availableData.conditions.length === 0) {
+                    alert('No available tests at the moment. Please try again later.');
+                    button.disabled = false;
+                    button.textContent = 'Start New Test';
+                    return;
+                }
+                
+                // Filter out completed conditions
+                const availableConditions = availableData.conditions.filter(c => !completed.includes(c));
+                
+                if (availableConditions.length === 0) {
+                    alert('You have already completed tests for all available conditions!');
+                    button.disabled = false;
+                    button.textContent = 'Start New Test';
+                    return;
+                }
+                
+                // Randomly select a condition
+                const randomCondition = availableConditions[Math.floor(Math.random() * availableConditions.length)];
+                
+                // Get a link for that condition
+                const linkResponse = await fetch(`${API_URL}?action=getAvailableLink&condition=${encodeURIComponent(randomCondition)}&userId=${userId}`);
+                const linkData = await linkResponse.json();
+                
+                if (!linkData.success) {
+                    alert(linkData.message || 'Failed to get a test link. Please try again.');
+                    button.disabled = false;
+                    button.textContent = 'Start New Test';
+                    return;
+                }
+                
+                // Store current test info
+                sessionStorage.setItem('currentCondition', randomCondition);
+                sessionStorage.setItem('currentAgentLink', linkData.link);
+                
+                // Display the test card
+                displayTestCard(randomCondition, linkData.link);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+                button.disabled = false;
+                button.textContent = 'Start New Test';
+            }
+        }
+
+        function displayTestCard(condition, link) {
+            document.getElementById('conditionLabel').textContent = condition;
+            document.getElementById('agentLink').href = link;
+            document.getElementById('agentLink').textContent = link;
+            
+            document.getElementById('startButton').style.display = 'none';
+            document.getElementById('testCard').classList.add('active');
+        }
+
+        function copyAgentLink() {
+            const link = sessionStorage.getItem('currentAgentLink');
+            navigator.clipboard.writeText(link).then(() => {
+                const btn = document.getElementById('copyAgentBtn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy Link';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copySurveyLink() {
+            const link = 'https://neu.co1.qualtrics.com/jfe/form/SV_6lkuGpk2d9qNKzI';
+            navigator.clipboard.writeText(link).then(() => {
+                event.target.textContent = '✓ Copied!';
+                event.target.classList.add('copied');
+                setTimeout(() => {
+                    event.target.textContent = '📋 Copy Link';
+                    event.target.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function markComplete() {
+            const condition = sessionStorage.getItem('currentCondition');
+            const link = sessionStorage.getItem('currentAgentLink');
+            
+            if (confirm(`Have you:\n1. Completed the conversation with the agent?\n2. Filled out the survey?\n3. Pasted the agent link in the survey?\n\nCondition: ${condition}`)) {
+                saveCompletedCondition(condition);
+                
+                // Clear session
+                sessionStorage.removeItem('currentCondition');
+                sessionStorage.removeItem('currentAgentLink');
+                
+                // Hide test card
+                document.getElementById('testCard').classList.remove('active');
+                document.getElementById('startButton').style.display = 'block';
+                document.getElementById('startButton').disabled = false;
+                document.getElementById('startButton').textContent = 'Start New Test';
+                
+                // Update progress
+                updateProgress();
+            }
+        }
+
+        // Initialize on load
+        updateProgress();
+    </script>
+</body>
+</html>
